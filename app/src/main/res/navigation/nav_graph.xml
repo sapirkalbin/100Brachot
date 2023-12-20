@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainFragment">
+
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.axppress.hundredblessings.ui.fragment.mainfragment.MainFragment"
+        android:label="MainFragment">
+        <action
+            android:id="@+id/action_mainFragment_to_smellFragment"
+            app:destination="@id/smellFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_tehilimFragment"
+            app:destination="@id/tehilimFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_sightFragment"
+            app:destination="@id/sightFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_foodFragment"
+            app:destination="@id/foodFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_specialBlessingsFragment"
+            app:destination="@id/specialBlessingsFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_morningFragment"
+            app:destination="@id/morningFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/foodFragment"
+        android:name="com.axppress.hundredblessings.ui.fragment.foodfragment.FoodBlessingsFragment"
+        android:label="FoodBlessingsFragment" />
+
+    <fragment
+        android:id="@+id/morningFragment"
+        android:name="com.axppress.hundredblessings.ui.fragment.morningfragment.MorningBlessingsFragment"
+        android:label="MorningBlessingsFragment" />
+
+    <fragment
+        android:id="@+id/specialBlessingsFragment"
+        android:name="com.axppress.hundredblessings.ui.fragment.specialblessingsfragment.SpecialBlessingsFragment"
+        android:label="SpecialBlessingsFragment" />
+
+    <fragment
+        android:id="@+id/tehilimFragment"
+        android:name="com.axppress.hundredblessings.ui.fragment.tehilimfragment.TehilimFragment"
+        android:label="TehilimFragment" />
+
+    <fragment
+        android:id="@+id/smellFragment"
+        android:name="com.axppress.hundredblessings.ui.fragment.smellfragment.SmellFragment"
+        android:label="SmellFragment" />
+
+    <fragment
+        android:id="@+id/sightFragment"
+        android:name="com.axppress.hundredblessings.ui.fragment.sightFragment.SightFragment"
+        android:label="SmellFragment" />
+
+
+</navigation>
