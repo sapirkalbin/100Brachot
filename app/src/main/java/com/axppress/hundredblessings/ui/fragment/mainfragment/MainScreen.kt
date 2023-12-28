@@ -2,11 +2,16 @@ package com.axppress.hundredblessings.ui.fragment.mainfragment
 
 import android.content.res.Configuration
 import android.view.MotionEvent
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,12 +24,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -38,25 +46,49 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.axppress.hundredblessings.R
 import com.axppress.hundredblessings.compose.theme.AppTheme
 import com.axppress.hundredblessings.utils.DefaultAnnotatedText
 import com.axppress.hundredblessings.utils.DefaultText
+import com.axppress.hundredblessings.utils.GENERAL_FRAGMENT
 import com.axppress.hundredblessings.utils.TextFormatter
+import com.axppress.hundredblessings.utils.getFragmentNameByNum
 import com.axppress.hundredblessings.utils.getNumberOfBlessingsToday
+import com.axppress.hundredblessings.utils.noRippleClick
 import com.axppress.hundredblessings.utils.textMultiStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+
 @Composable
-fun MainScreen(onBlessedButtonClick: () -> Unit) {
-    ScreenContent(onBlessedButtonClick)
+fun MainScreen(
+    navController: NavHostController,
+    viewModel: MainViewModel,
+    onBlessedButtonClick: () -> Unit,
+) {
+    ScreenContent(navController, viewModel)
+    { onBlessedButtonClick() }
+}
+
+fun navigate(
+    navController: NavHostController,
+    name: String,
+    onCategoryClicked: (String) -> Unit,
+) {
+    onCategoryClicked(name)
+    navController.navigate(name)
 }
 
 @Composable
-private fun ScreenContent(onBlessedButtonClick: () -> Unit) {
+private fun ScreenContent(
+    navController: NavHostController,
+    viewModel: MainViewModel,
+    onBlessedButtonClick: () -> Unit,
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -64,12 +96,24 @@ private fun ScreenContent(onBlessedButtonClick: () -> Unit) {
             .padding(top = 64.dp),
     ) {
         TopTexts()
-        BottomPanel(onBlessedButtonClick)
+        BottomPanel(onBlessedButtonClick, navController, viewModel)
     }
 }
 
 @Composable
-private fun BottomPanel(onBlessedButtonClick: () -> Unit) {
+private fun BottomPanel(
+    onBlessedButtonClick: () -> Unit,
+    navController: NavHostController,
+    viewModel: MainViewModel,
+) {
+    val states = remember {
+        SnapshotStateList<Boolean>().also {
+            for (day in 0..9) {
+                it.add(false)
+            }
+        }
+    }
+
     Box(
         contentAlignment = Alignment.TopCenter,
         modifier = Modifier
@@ -104,8 +148,12 @@ private fun BottomPanel(onBlessedButtonClick: () -> Unit) {
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                            ),
+                                color = if (states[3]) MaterialTheme.colorScheme.background else
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                            )
+                            .noRippleClick {
+                                onButtonClick(states, navController, viewModel, 3)
+                            },
                     ) {
                         DefaultText(
                             "על ראייה",
@@ -140,23 +188,63 @@ private fun BottomPanel(onBlessedButtonClick: () -> Unit) {
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                            ),
+                                color = if (states[2]) MaterialTheme.colorScheme.background else
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                            )
+                            .noRippleClick {
+                                onButtonClick(states, navController, viewModel, 2)
+                            },
                     ) {
                         DefaultText(
                             "על מזון",
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(
-                                    start = 8.dp,
-                                    end = 8.dp,
-                                    top = 16.dp,
-                                    bottom = 4.dp
+                                    start = 8.dp, end = 8.dp, top = 16.dp, bottom = 4.dp
                                 ),
                             textStyleAndSize = MaterialTheme.typography.bodyLarge,
                         )
                         Image(
-                            painterResource(id = R.drawable.dish),
+                            painterResource(id = R.drawable.food),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .size(50.dp)
+                                .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
+                                .align(Alignment.CenterHorizontally),
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(end = 8.dp)
+                            .border(
+                                width = 3.dp,
+                                color = MaterialTheme.colorScheme.background,
+                                shape = RoundedCornerShape(16.dp),
+                            )
+                            .background(
+                                shape = RoundedCornerShape(16.dp),
+                                color = if (states[1]) MaterialTheme.colorScheme.background else
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                            )
+                            .noRippleClick {
+                                onButtonClick(states, navController, viewModel, 1)
+                            },
+                    ) {
+                        DefaultText(
+                            "שמיעה",
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(
+                                    start = 8.dp, end = 8.dp, top = 16.dp, bottom = 4.dp
+                                ),
+                            textStyleAndSize = MaterialTheme.typography.bodyLarge,
+
+                            )
+                        Image(
+                            painterResource(id = R.drawable.ear),
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
@@ -176,9 +264,11 @@ private fun BottomPanel(onBlessedButtonClick: () -> Unit) {
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                            ).clickable {
-
+                                color = if (states[0]) MaterialTheme.colorScheme.background else
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                            )
+                            .noRippleClick {
+                                onButtonClick(states, navController, viewModel, 0)
                             },
                     ) {
                         DefaultText(
@@ -186,16 +276,13 @@ private fun BottomPanel(onBlessedButtonClick: () -> Unit) {
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(
-                                    start = 8.dp,
-                                    end = 8.dp,
-                                    top = 16.dp,
-                                    bottom = 4.dp
+                                    start = 8.dp, end = 8.dp, top = 16.dp, bottom = 4.dp
                                 ),
                             textStyleAndSize = MaterialTheme.typography.bodyLarge,
 
                             )
                         Image(
-                            painterResource(id = R.drawable.flash),
+                            painterResource(id = R.drawable.nose),
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
@@ -218,23 +305,25 @@ private fun BottomPanel(onBlessedButtonClick: () -> Unit) {
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                            ),
+                                color = if (states[6]) MaterialTheme.colorScheme.background else
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                            )
+                            .noRippleClick {
+                                onButtonClick(states, navController, viewModel, 6)
+                            },
                     ) {
                         DefaultText(
-                            "הנהגות בוקר",
+                            "ברכות שונות",
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(
-                                    start = 8.dp,
-                                    bottom = 4.dp,
-                                    top = 16.dp,
-                                    end = 8.dp,
+                                    start = 8.dp, end = 8.dp, top = 16.dp, bottom = 4.dp
                                 ),
                             textStyleAndSize = MaterialTheme.typography.bodyLarge,
-                        )
+
+                            )
                         Image(
-                            painterResource(id = R.drawable.light),
+                            painterResource(id = R.drawable.flash),
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
@@ -254,23 +343,24 @@ private fun BottomPanel(onBlessedButtonClick: () -> Unit) {
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                            ),
+                                color = if (states[5]) MaterialTheme.colorScheme.background else
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                            )
+                            .noRippleClick {
+                                onButtonClick(states, navController, viewModel, 5)
+                            },
                     ) {
                         DefaultText(
-                            "על מזון",
+                            "קריאת שמע",
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(
-                                    start = 8.dp,
-                                    end = 8.dp,
-                                    top = 16.dp,
-                                    bottom = 4.dp
+                                    start = 8.dp, end = 8.dp, top = 16.dp, bottom = 4.dp
                                 ),
                             textStyleAndSize = MaterialTheme.typography.bodyLarge,
                         )
                         Image(
-                            painterResource(id = R.drawable.dish),
+                            painterResource(id = R.drawable.sleeping),
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
@@ -282,6 +372,7 @@ private fun BottomPanel(onBlessedButtonClick: () -> Unit) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(end = 8.dp)
                             .weight(1f)
                             .border(
                                 width = 3.dp,
@@ -290,24 +381,68 @@ private fun BottomPanel(onBlessedButtonClick: () -> Unit) {
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                            ),
+                                color = if (states[4]) MaterialTheme.colorScheme.background else
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                            )
+                            .noRippleClick {
+                                onButtonClick(states, navController, viewModel, 4)
+                            },
                     ) {
                         DefaultText(
-                            "ברכות שונות",
+                            "הנהגות בוקר",
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(
                                     start = 8.dp,
-                                    end = 8.dp,
+                                    bottom = 4.dp,
                                     top = 16.dp,
-                                    bottom = 4.dp
+                                    end = 8.dp,
                                 ),
                             textStyleAndSize = MaterialTheme.typography.bodyLarge,
-
-                            )
+                        )
                         Image(
-                            painterResource(id = R.drawable.flash),
+                            painterResource(id = R.drawable.sunrise),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .size(50.dp)
+                                .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
+                                .align(Alignment.CenterHorizontally),
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .border(
+                                width = 3.dp,
+                                color = MaterialTheme.colorScheme.background,
+                                shape = RoundedCornerShape(16.dp),
+                            )
+                            .background(
+                                shape = RoundedCornerShape(16.dp),
+                                color = if (states[4]) MaterialTheme.colorScheme.background else
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                            )
+                            .noRippleClick {
+                                onButtonClick(states, navController, viewModel, 9)
+                            },
+                    ) {
+                        DefaultText(
+                            "דברים חדשים",
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(
+                                    start = 8.dp,
+                                    bottom = 4.dp,
+                                    top = 16.dp,
+                                    end = 8.dp,
+                                ),
+                            textStyleAndSize = MaterialTheme.typography.bodyLarge,
+                        )
+                        Image(
+                            painterResource(id = R.drawable.tshirt),
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
@@ -329,8 +464,12 @@ private fun BottomPanel(onBlessedButtonClick: () -> Unit) {
                         )
                         .background(
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                        ),
+                            color = if (states[7]) MaterialTheme.colorScheme.background else
+                                MaterialTheme.colorScheme.secondaryContainer,
+                        )
+                        .noRippleClick {
+                            onButtonClick(states, navController, viewModel, 7)
+                        },
                 ) {
                     DefaultText(
                         "תהילים",
@@ -365,8 +504,12 @@ private fun BottomPanel(onBlessedButtonClick: () -> Unit) {
                         )
                         .background(
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                        ),
+                            color = if (states[8]) MaterialTheme.colorScheme.background else
+                                MaterialTheme.colorScheme.secondaryContainer,
+                        )
+                        .noRippleClick {
+                            onButtonClick(states, navController, viewModel, 8)
+                        },
                 ) {
                     DefaultText(
                         "תפילות מיוחדות",
@@ -395,6 +538,48 @@ private fun BottomPanel(onBlessedButtonClick: () -> Unit) {
         BlessedButton {
             onBlessedButtonClick()
         }
+    }
+}
+
+private fun onButtonClick(
+    states: SnapshotStateList<Boolean>,
+    navController: NavHostController,
+    viewModel: MainViewModel, numOfFragment: Int,
+) {
+    animateBackgroundColor(states, numOfFragment) {
+        navigateToGeneralFragment(
+            navController,
+            viewModel,
+            numOfFragment
+        )
+    }
+}
+
+private fun navigateToGeneralFragment(
+    navController: NavHostController,
+    viewModel: MainViewModel,
+    numOfFragment: Int,
+) {
+    val fragmentName = getFragmentNameByNum(numOfFragment)
+
+    navigate(
+        navController,
+        GENERAL_FRAGMENT,
+        onCategoryClicked = { viewModel.onCategoryClicked(fragmentName) })
+}
+
+private fun animateBackgroundColor(
+    states: SnapshotStateList<Boolean>,
+    numOfButton: Int,
+    onAnimationEnd: () -> Unit,
+) {
+    states[numOfButton] = true
+    CoroutineScope(Dispatchers.IO).launch {
+        delay(500)
+        CoroutineScope(Dispatchers.Main).launch {
+            onAnimationEnd()
+        }
+        states[numOfButton] = false
     }
 }
 
@@ -567,6 +752,6 @@ data class TextWithStyle(
 @Composable
 private fun MainScreenPreview() {
     AppTheme {
-        ScreenContent {}
+        ScreenContent(rememberNavController(), MainViewModel(), onBlessedButtonClick = {})
     }
 }

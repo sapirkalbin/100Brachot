@@ -1,6 +1,7 @@
-package com.axppress.hundredblessings.ui.fragment.foodfragment
+package com.axppress.hundredblessings.ui.fragment.generalfragment
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,28 +12,51 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.axppress.hundredblessings.compose.theme.AppTheme
 import com.axppress.hundredblessings.ui.compose.BlessingListItem
 import com.axppress.hundredblessings.ui.fragment.mainfragment.MainViewModel
+import com.axppress.hundredblessings.utils.BLESSING_FRAGMENT
 import com.axppress.hundredblessings.utils.getEnumByFragmentName
 
 @Composable
-fun FoodBlessingsScreen(viewModel: MainViewModel) {
-    ScreenContent(viewModel.getCurrentFragment(), onBlessingClicked = {})
+fun GeneralBlessingsScreen(viewModel: MainViewModel, navController: NavHostController) {
+    ScreenContent(
+        viewModel.getCurrentFragment(), viewModel, navController
+    )
 }
 
+private fun onBlessingClicked(
+    num: Int,
+    viewModel: MainViewModel,
+    navController: NavHostController,
+) {
+    viewModel.onBlessingClicked(num)
+    navController.navigate(BLESSING_FRAGMENT)
+}
+
+
 @Composable
-private fun ScreenContent(currentFragment: String, onBlessingClicked: (Int) -> Unit) {
+private fun ScreenContent(
+    currentFragment: String,
+    viewModel: MainViewModel,
+    navController: NavHostController,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 32.dp)
+            .padding(horizontal = 8.dp)
     ) {
         ListItems(
             getEnumByFragmentName(currentFragment),
             currentFragment
         ) {
-            onBlessingClicked(it)
+            onBlessingClicked(
+                it,
+                viewModel,
+                navController
+            )
         }
     }
 }
@@ -45,6 +69,7 @@ fun ColumnScope.ListItems(
     onBlessingClicked: (Int) -> Unit,
 ) {
     LazyColumn(
+        verticalArrangement = Arrangement.SpaceEvenly,
         contentPadding = PaddingValues(vertical = 8.dp),
         modifier = Modifier.weight(1f),
     ) {
@@ -63,6 +88,6 @@ fun ColumnScope.ListItems(
 @Composable
 private fun FoodBlessingsScreenPreview() {
     AppTheme {
-        ScreenContent("food", onBlessingClicked = {})
+        ScreenContent("food", MainViewModel(), rememberNavController())
     }
 }

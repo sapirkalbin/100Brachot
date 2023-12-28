@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.axppress.hundredblessings.compose.theme.AppTheme
-import com.axppress.hundredblessings.ui.fragment.foodfragment.FoodBlessingsScreen
 
 @Composable
 fun TehilimScreen() {
