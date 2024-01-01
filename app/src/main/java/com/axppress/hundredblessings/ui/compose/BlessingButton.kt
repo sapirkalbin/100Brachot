@@ -31,7 +31,7 @@ fun BlessingButton(string: String, num: Int, onBlessingClicked: (Int) -> Unit) {
             onBlessingClicked(num)
         }) {
         DefaultText(
-            stringResource(getResourcesCompose(string)),
+            string,
             modifier = Modifier
                 .fillMaxWidth(),
             textStyleAndSize = MaterialTheme.typography.bodyLarge.merge(TextStyle(fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold))

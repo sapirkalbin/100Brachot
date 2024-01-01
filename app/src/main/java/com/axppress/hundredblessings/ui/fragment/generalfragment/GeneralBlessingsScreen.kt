@@ -2,6 +2,7 @@ package com.axppress.hundredblessings.ui.fragment.generalfragment
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -43,20 +44,24 @@ private fun ScreenContent(
     viewModel: MainViewModel,
     navController: NavHostController,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 8.dp)
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = androidx.compose.ui.Alignment.Center
     ) {
-        ListItems(
-            getEnumByFragmentName(currentFragment),
-            currentFragment
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
         ) {
-            onBlessingClicked(
-                it,
-                viewModel,
-                navController
-            )
+            ListItems(
+                getEnumByFragmentName(currentFragment),
+                currentFragment
+            ) {
+                onBlessingClicked(
+                    it,
+                    viewModel,
+                    navController
+                )
+            }
         }
     }
 }
@@ -69,9 +74,8 @@ fun ColumnScope.ListItems(
     onBlessingClicked: (Int) -> Unit,
 ) {
     LazyColumn(
-        verticalArrangement = Arrangement.SpaceEvenly,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(vertical = 8.dp),
-        modifier = Modifier.weight(1f),
     ) {
         items(
             count = enumCls.enumConstants.size,
@@ -88,6 +92,6 @@ fun ColumnScope.ListItems(
 @Composable
 private fun FoodBlessingsScreenPreview() {
     AppTheme {
-        ScreenContent("food", MainViewModel(), rememberNavController())
+        ScreenContent("ear", MainViewModel(), rememberNavController())
     }
 }

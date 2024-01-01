@@ -2,13 +2,7 @@ package com.axppress.hundredblessings.ui.fragment.mainfragment
 
 import android.content.res.Configuration
 import android.view.MotionEvent
-import androidx.compose.animation.animateColor
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,14 +19,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -53,6 +48,7 @@ import com.axppress.hundredblessings.compose.theme.AppTheme
 import com.axppress.hundredblessings.utils.DefaultAnnotatedText
 import com.axppress.hundredblessings.utils.DefaultText
 import com.axppress.hundredblessings.utils.GENERAL_FRAGMENT
+import com.axppress.hundredblessings.utils.HTML_FRAGMENT
 import com.axppress.hundredblessings.utils.TextFormatter
 import com.axppress.hundredblessings.utils.getFragmentNameByNum
 import com.axppress.hundredblessings.utils.getNumberOfBlessingsToday
@@ -77,9 +73,7 @@ fun MainScreen(
 fun navigate(
     navController: NavHostController,
     name: String,
-    onCategoryClicked: (String) -> Unit,
 ) {
-    onCategoryClicked(name)
     navController.navigate(name)
 }
 
@@ -89,14 +83,22 @@ private fun ScreenContent(
     viewModel: MainViewModel,
     onBlessedButtonClick: () -> Unit,
 ) {
+    val num = LocalContext.current.getNumberOfBlessingsToday()
+    var numberOfBlessingsToday by remember {
+        mutableIntStateOf(num)
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 64.dp),
     ) {
-        TopTexts()
-        BottomPanel(onBlessedButtonClick, navController, viewModel)
+        TopTexts(numberOfBlessingsToday)
+        BottomPanel({
+            onBlessedButtonClick()
+            numberOfBlessingsToday++
+        }, navController, viewModel)
     }
 }
 
@@ -108,7 +110,7 @@ private fun BottomPanel(
 ) {
     val states = remember {
         SnapshotStateList<Boolean>().also {
-            for (day in 0..9) {
+            for (day in 0..10) {
                 it.add(false)
             }
         }
@@ -323,7 +325,7 @@ private fun BottomPanel(
 
                             )
                         Image(
-                            painterResource(id = R.drawable.flash),
+                            painterResource(id = R.drawable.car),
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
@@ -422,7 +424,7 @@ private fun BottomPanel(
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = if (states[4]) MaterialTheme.colorScheme.background else
+                                color = if (states[9]) MaterialTheme.colorScheme.background else
                                     MaterialTheme.colorScheme.secondaryContainer,
                             )
                             .noRippleClick {
@@ -493,46 +495,46 @@ private fun BottomPanel(
                             .align(Alignment.CenterHorizontally),
                     )
                 }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
-                        .border(
-                            width = 3.dp,
-                            color = MaterialTheme.colorScheme.background,
-                            shape = RoundedCornerShape(16.dp),
-                        )
-                        .background(
-                            shape = RoundedCornerShape(16.dp),
-                            color = if (states[8]) MaterialTheme.colorScheme.background else
-                                MaterialTheme.colorScheme.secondaryContainer,
-                        )
-                        .noRippleClick {
-                            onButtonClick(states, navController, viewModel, 8)
-                        },
-                ) {
-                    DefaultText(
-                        "תפילות מיוחדות",
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(
-                                start = 8.dp,
-                                bottom = 4.dp,
-                                top = 16.dp,
-                                end = 8.dp,
-                            ),
-                        textStyleAndSize = MaterialTheme.typography.bodyLarge,
-                    )
-                    Image(
-                        painterResource(id = R.drawable.synagogue),
-                        contentDescription = "",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .size(50.dp)
-                            .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
-                            .align(Alignment.CenterHorizontally),
-                    )
-                }
+                /*                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp)
+                                        .border(
+                                            width = 3.dp,
+                                            color = MaterialTheme.colorScheme.background,
+                                            shape = RoundedCornerShape(16.dp),
+                                        )
+                                        .background(
+                                            shape = RoundedCornerShape(16.dp),
+                                            color = if (states[8]) MaterialTheme.colorScheme.background else
+                                                MaterialTheme.colorScheme.secondaryContainer,
+                                        )
+                                        .noRippleClick {
+                                            onButtonClick(states, navController, viewModel, 8)
+                                        },
+                                ) {
+                                    DefaultText(
+                                        "תפילות מיוחדות",
+                                        modifier = Modifier
+                                            .align(Alignment.CenterHorizontally)
+                                            .padding(
+                                                start = 8.dp,
+                                                bottom = 4.dp,
+                                                top = 16.dp,
+                                                end = 8.dp,
+                                            ),
+                                        textStyleAndSize = MaterialTheme.typography.bodyLarge,
+                                    )
+                                    Image(
+                                        painterResource(id = R.drawable.synagogue),
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier
+                                            .size(50.dp)
+                                            .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
+                                            .align(Alignment.CenterHorizontally),
+                                    )
+                                }*/
             }
         }
         BlessedButton {
@@ -546,26 +548,45 @@ private fun onButtonClick(
     navController: NavHostController,
     viewModel: MainViewModel, numOfFragment: Int,
 ) {
+    val fragmentName = getFragmentNameByNum(numOfFragment)
+    viewModel.onCategoryClicked(fragmentName)
+
     animateBackgroundColor(states, numOfFragment) {
-        navigateToGeneralFragment(
-            navController,
-            viewModel,
-            numOfFragment
-        )
+
+        if (numOfFragment == 5) {
+            viewModel.onBlessingClicked(0)
+            navigateToHtmlFragment(
+                navController
+            )
+        } else {
+            navigateToGeneralFragment(
+                navController,
+                fragmentName,
+                numOfFragment
+            )
+        }
     }
 }
 
 private fun navigateToGeneralFragment(
     navController: NavHostController,
-    viewModel: MainViewModel,
+    fragmentName: String,
     numOfFragment: Int,
 ) {
-    val fragmentName = getFragmentNameByNum(numOfFragment)
-
     navigate(
         navController,
-        GENERAL_FRAGMENT,
-        onCategoryClicked = { viewModel.onCategoryClicked(fragmentName) })
+        GENERAL_FRAGMENT
+    )
+}
+
+private fun navigateToHtmlFragment(
+    navController: NavHostController,
+) {
+    val header = "קריאת שמע שעל המיטה"
+    navController.popBackStack()
+    navController.navigate("$HTML_FRAGMENT/$header") {
+        launchSingleTop = true
+    }
 }
 
 private fun animateBackgroundColor(
@@ -575,7 +596,7 @@ private fun animateBackgroundColor(
 ) {
     states[numOfButton] = true
     CoroutineScope(Dispatchers.IO).launch {
-        delay(500)
+        delay(350)
         CoroutineScope(Dispatchers.Main).launch {
             onAnimationEnd()
         }
@@ -653,8 +674,7 @@ private fun BlessedButton(onBlessedButtonClick: () -> Unit) {
 }
 
 @Composable
-private fun TopTexts() {
-    val numberOfBlessingsToday = LocalContext.current.getNumberOfBlessingsToday()
+private fun TopTexts(numberOfBlessingsToday: Int) {
     val blessingsToGo = if (numberOfBlessingsToday < 100) {
         100 - numberOfBlessingsToday
     } else {
