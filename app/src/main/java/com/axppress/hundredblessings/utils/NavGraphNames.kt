@@ -9,13 +9,12 @@ const val FRAGMENT_2 = "food" //9
 const val FRAGMENT_3 = "sight" //15
 const val FRAGMENT_4 = "morning" //1
 const val FRAGMENT_5 = "night" //1
-const val FRAGMENT_6 = "other" //3
+const val FRAGMENT_6 = "other" //6
 const val FRAGMENT_7 = "tehilim"
 const val FRAGMENT_8 = "specials"
 const val FRAGMENT_9  = "news" //6
 
 const val BLESSING_FRAGMENT = "blessing"
-const val HTML_FRAGMENT = "html"
 
 
 fun getFragmentNameByNum(num: Int) = when (num) {

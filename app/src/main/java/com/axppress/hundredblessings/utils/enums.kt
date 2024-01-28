@@ -74,6 +74,7 @@ enum class OtherBlessings(val num: Int) {
     HEALTHIER(2),
     DOUGH_PRAYER(3),
     WAY_PRAYER(4),
+    ASHER_YATZAR(5),
 }
 
 enum class SpecialPrayers(val num: Int) {

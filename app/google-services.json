@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "99352244140",
+    "project_id": "brachot-e5e48",
+    "storage_bucket": "brachot-e5e48.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:99352244140:android:7a8f18cef2e9155e63d409",
+        "android_client_info": {
+          "package_name": "com.axppress.hundredblessings"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9ZNRVcuFIErApT8lZux1OEtmh82u7-NQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

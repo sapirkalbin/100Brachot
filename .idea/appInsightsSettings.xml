@@ -27,10 +27,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.axppress.hundredblessings" />
+                  <option name="mobileSdkAppId" value="1:99352244140:android:7a8f18cef2e9155e63d409" />
+                  <option name="projectId" value="brachot-e5e48" />
+                  <option name="projectNumber" value="99352244140" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

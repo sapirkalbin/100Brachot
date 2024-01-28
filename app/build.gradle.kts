@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    // kotlin("plugin.serialization") version "1.4.21"
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -61,6 +63,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.firebase.database.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -92,4 +95,22 @@ dependencies {
     // Image Loading
     implementation("io.coil-kt:coil:2.4.0")
     implementation("io.coil-kt:coil-compose:2.4.0")
+
+//
+//    val ktorVersion = "1.6.3"
+//    implementation("io.ktor:ktor-client-core:$ktorVersion")
+//    implementation("io.ktor:ktor-client-android:$ktorVersion")
+//    implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+//    implementation("io.ktor:ktor-client-logging:$ktorVersion")
+//
+//    implementation("ch.qos.logback:logback-classic:1.2.3")
+//    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+
+
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-auth")
+
+    implementation("androidx.compose.runtime:runtime-livedata:1.0.4")
+
+
 }

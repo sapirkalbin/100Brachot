@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,10 +46,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.axppress.hundredblessings.R
 import com.axppress.hundredblessings.compose.theme.AppTheme
+import com.axppress.hundredblessings.domain.remote.FirebaseDatabaseService
+import com.axppress.hundredblessings.ui.activity.MainActivity
+import com.axppress.hundredblessings.utils.BLESSING_FRAGMENT
 import com.axppress.hundredblessings.utils.DefaultAnnotatedText
 import com.axppress.hundredblessings.utils.DefaultText
+import com.axppress.hundredblessings.utils.FRAGMENT_5
 import com.axppress.hundredblessings.utils.GENERAL_FRAGMENT
-import com.axppress.hundredblessings.utils.HTML_FRAGMENT
+import com.axppress.hundredblessings.utils.MAIN_FRAGMENT
 import com.axppress.hundredblessings.utils.TextFormatter
 import com.axppress.hundredblessings.utils.getFragmentNameByNum
 import com.axppress.hundredblessings.utils.getNumberOfBlessingsToday
@@ -57,8 +62,11 @@ import com.axppress.hundredblessings.utils.textMultiStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+var itemClicked = false
 
 @Composable
 fun MainScreen(
@@ -66,8 +74,11 @@ fun MainScreen(
     viewModel: MainViewModel,
     onBlessedButtonClick: () -> Unit,
 ) {
-    ScreenContent(navController, viewModel)
-    { onBlessedButtonClick() }
+    //DISABLE DOUBLE CLICKS
+    if (navController.currentDestination?.route == MAIN_FRAGMENT) {
+        itemClicked = false
+    }
+    ScreenContent(navController, viewModel) { onBlessedButtonClick() }
 }
 
 fun navigate(
@@ -150,8 +161,7 @@ private fun BottomPanel(
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = if (states[3]) MaterialTheme.colorScheme.background else
-                                    MaterialTheme.colorScheme.secondaryContainer,
+                                color = if (states[3]) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.secondaryContainer,
                             )
                             .noRippleClick {
                                 onButtonClick(states, navController, viewModel, 3)
@@ -190,8 +200,7 @@ private fun BottomPanel(
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = if (states[2]) MaterialTheme.colorScheme.background else
-                                    MaterialTheme.colorScheme.secondaryContainer,
+                                color = if (states[2]) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.secondaryContainer,
                             )
                             .noRippleClick {
                                 onButtonClick(states, navController, viewModel, 2)
@@ -228,8 +237,7 @@ private fun BottomPanel(
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = if (states[1]) MaterialTheme.colorScheme.background else
-                                    MaterialTheme.colorScheme.secondaryContainer,
+                                color = if (states[1]) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.secondaryContainer,
                             )
                             .noRippleClick {
                                 onButtonClick(states, navController, viewModel, 1)
@@ -266,8 +274,7 @@ private fun BottomPanel(
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = if (states[0]) MaterialTheme.colorScheme.background else
-                                    MaterialTheme.colorScheme.secondaryContainer,
+                                color = if (states[0]) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.secondaryContainer,
                             )
                             .noRippleClick {
                                 onButtonClick(states, navController, viewModel, 0)
@@ -307,8 +314,7 @@ private fun BottomPanel(
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = if (states[6]) MaterialTheme.colorScheme.background else
-                                    MaterialTheme.colorScheme.secondaryContainer,
+                                color = if (states[6]) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.secondaryContainer,
                             )
                             .noRippleClick {
                                 onButtonClick(states, navController, viewModel, 6)
@@ -345,8 +351,7 @@ private fun BottomPanel(
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = if (states[5]) MaterialTheme.colorScheme.background else
-                                    MaterialTheme.colorScheme.secondaryContainer,
+                                color = if (states[5]) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.secondaryContainer,
                             )
                             .noRippleClick {
                                 onButtonClick(states, navController, viewModel, 5)
@@ -383,8 +388,7 @@ private fun BottomPanel(
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = if (states[4]) MaterialTheme.colorScheme.background else
-                                    MaterialTheme.colorScheme.secondaryContainer,
+                                color = if (states[4]) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.secondaryContainer,
                             )
                             .noRippleClick {
                                 onButtonClick(states, navController, viewModel, 4)
@@ -424,8 +428,7 @@ private fun BottomPanel(
                             )
                             .background(
                                 shape = RoundedCornerShape(16.dp),
-                                color = if (states[9]) MaterialTheme.colorScheme.background else
-                                    MaterialTheme.colorScheme.secondaryContainer,
+                                color = if (states[9]) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.secondaryContainer,
                             )
                             .noRippleClick {
                                 onButtonClick(states, navController, viewModel, 9)
@@ -466,11 +469,10 @@ private fun BottomPanel(
                         )
                         .background(
                             shape = RoundedCornerShape(16.dp),
-                            color = if (states[7]) MaterialTheme.colorScheme.background else
-                                MaterialTheme.colorScheme.secondaryContainer,
+                            color = if (states[7]) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.secondaryContainer,
                         )
                         .noRippleClick {
-                            onButtonClick(states, navController, viewModel, 7)
+                            //onButtonClick(states, navController, viewModel, 7)
                         },
                 ) {
                     DefaultText(
@@ -494,8 +496,7 @@ private fun BottomPanel(
                             .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
                             .align(Alignment.CenterHorizontally),
                     )
-                }
-                /*                Column(
+                }/*                Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = 8.dp)
@@ -548,21 +549,20 @@ private fun onButtonClick(
     navController: NavHostController,
     viewModel: MainViewModel, numOfFragment: Int,
 ) {
-    val fragmentName = getFragmentNameByNum(numOfFragment)
-    viewModel.onCategoryClicked(fragmentName)
+    if (!itemClicked) {
+        itemClicked = true
+        val fragmentName = getFragmentNameByNum(numOfFragment)
+        viewModel.onCategoryClicked(fragmentName)
 
-    animateBackgroundColor(states, numOfFragment) {
-
-        if (numOfFragment == 5) {
-            viewModel.onBlessingClicked(0)
-            navigateToHtmlFragment(
-                navController
-            )
-        } else {
-            navigateToGeneralFragment(
-                navController,
-                fragmentName,
-                numOfFragment
+        animateBackgroundColor(states, numOfFragment) {
+            if (fragmentName == FRAGMENT_5) {
+                navController.navigate(
+                    "$BLESSING_FRAGMENT?blessing=$fragmentName?type=${0}?noSubList=${false}?isLong=${
+                        true
+                    }"
+                )
+            } else navigateToGeneralFragment(
+                navController, fragmentName, numOfFragment
             )
         }
     }
@@ -574,19 +574,8 @@ private fun navigateToGeneralFragment(
     numOfFragment: Int,
 ) {
     navigate(
-        navController,
-        GENERAL_FRAGMENT
+        navController, GENERAL_FRAGMENT
     )
-}
-
-private fun navigateToHtmlFragment(
-    navController: NavHostController,
-) {
-    val header = "קריאת שמע שעל המיטה"
-    navController.popBackStack()
-    navController.navigate("$HTML_FRAGMENT/$header") {
-        launchSingleTop = true
-    }
 }
 
 private fun animateBackgroundColor(
@@ -596,7 +585,7 @@ private fun animateBackgroundColor(
 ) {
     states[numOfButton] = true
     CoroutineScope(Dispatchers.IO).launch {
-        delay(350)
+        delay(70)
         CoroutineScope(Dispatchers.Main).launch {
             onAnimationEnd()
         }
@@ -681,9 +670,42 @@ private fun TopTexts(numberOfBlessingsToday: Int) {
         0
     }
 
-    val numberOfBlessingsTodayGeneral = TextFormatter.numberWithCommas(10203)
-    val blessingsToGoGeneral = 100 - (10203 % 100)
+    var numberOfBlessingsTodayGeneral by remember {
+        mutableIntStateOf(FirebaseDatabaseService.instance.numOfBlessings.value)
+    }
+    var numberOfBlessingsTodayGeneralFormatted =
+        TextFormatter.numberWithCommas(numberOfBlessingsTodayGeneral)
+    var blessingsToGoGeneral = 100 - (numberOfBlessingsTodayGeneral % 100)
 
+
+    LaunchedEffect(key1 = Unit) {
+        launch {
+            FirebaseDatabaseService.instance.numOfBlessings.collectLatest {
+                numberOfBlessingsTodayGeneral = it
+                numberOfBlessingsTodayGeneralFormatted =
+                    TextFormatter.numberWithCommas(it)
+                blessingsToGoGeneral = 100 - (it % 100)
+            }
+        }
+    }
+
+
+
+    TopTextsScreenContent(
+        numberOfBlessingsToday,
+        blessingsToGo,
+        numberOfBlessingsTodayGeneralFormatted,
+        blessingsToGoGeneral
+    )
+}
+
+@Composable
+private fun TopTextsScreenContent(
+    numberOfBlessingsToday: Int,
+    blessingsToGo: Int,
+    numberOfBlessingsTodayGeneralFormatted: String,
+    blessingsToGoGeneral: Int,
+) {
     DefaultAnnotatedText(
         textMultiStyle(
             String.format(
@@ -704,25 +726,28 @@ private fun TopTexts(numberOfBlessingsToday: Int) {
         )
     }
 
-    DefaultAnnotatedText(
-        textMultiStyle(
-            String.format(
-                stringResource(id = R.string.main_fragment_msg3),
-                blessingsToGo.toString(),
-            ),
-            listOf(
-                TextWithStyle(
-                    customText = blessingsToGo.toString(),
-                    style = TextStyle(fontWeight = FontWeight.ExtraBold),
+    if (numberOfBlessingsToday < 100) {
+        DefaultAnnotatedText(
+            textMultiStyle(
+                String.format(
+                    stringResource(id = R.string.main_fragment_msg3),
+                    blessingsToGo.toString(),
+                ),
+                listOf(
+                    TextWithStyle(
+                        customText = blessingsToGo.toString(),
+                        style = TextStyle(fontWeight = FontWeight.ExtraBold),
+                    ),
                 ),
             ),
-        ),
-    )
+        )
+    }
 
     val text5 = String.format(
         stringResource(id = R.string.main_fragment_msg4),
-        numberOfBlessingsTodayGeneral,
+        numberOfBlessingsTodayGeneralFormatted,
     )
+
     DefaultAnnotatedText(
         textMultiStyle(
             text5,

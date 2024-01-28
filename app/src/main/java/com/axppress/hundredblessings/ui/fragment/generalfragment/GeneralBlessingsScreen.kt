@@ -19,6 +19,10 @@ import com.axppress.hundredblessings.compose.theme.AppTheme
 import com.axppress.hundredblessings.ui.compose.BlessingListItem
 import com.axppress.hundredblessings.ui.fragment.mainfragment.MainViewModel
 import com.axppress.hundredblessings.utils.BLESSING_FRAGMENT
+import com.axppress.hundredblessings.utils.FRAGMENT_2
+import com.axppress.hundredblessings.utils.FRAGMENT_4
+import com.axppress.hundredblessings.utils.FRAGMENT_5
+import com.axppress.hundredblessings.utils.FRAGMENT_6
 import com.axppress.hundredblessings.utils.getEnumByFragmentName
 
 @Composable
@@ -34,9 +38,19 @@ private fun onBlessingClicked(
     navController: NavHostController,
 ) {
     viewModel.onBlessingClicked(num)
-    navController.navigate(BLESSING_FRAGMENT)
+
+    navController.navigate(
+        "$BLESSING_FRAGMENT?blessing=${viewModel.getCurrentFragment()}?type=${num}?noSubList=${false}?isLong=${
+            isLongBlessing(
+                viewModel.getCurrentFragment(), num
+            )
+        }"
+    )
 }
 
+fun isLongBlessing(name: String, num: Int): Boolean {
+    return name == FRAGMENT_4 || name == FRAGMENT_5 || (name == FRAGMENT_2 && num == 7) || (name == FRAGMENT_6 && num == 4)
+}
 
 @Composable
 private fun ScreenContent(

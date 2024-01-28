@@ -2,6 +2,7 @@ package com.axppress.hundredblessings.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.axppress.hundredblessings.domain.remote.FirebaseDatabaseService
 
 fun Context.getSharedPreferences(): SharedPreferences {
     return getSharedPreferences("SharedPreferencesManager", Context.MODE_PRIVATE)
@@ -15,13 +16,25 @@ fun Context.putInt(key: String, value: Int) {
     getSharedPreferences().edit().putInt(key, value).apply()
 }
 
+fun Context.putLastDate(value: String) {
+    getSharedPreferences().edit().putString(LAST_DATE, value).apply()
+}
+
+fun Context.getLastDate() = getString(LAST_DATE)
+
+
 fun Context.getInt(key: String) = getSharedPreferences().getInt(key, 0)
+fun Context.getString(key: String) = getSharedPreferences().getString(key, "")
 
-fun Context.getNumberOfBlessingsToday() = getInt(NUM_OF_BLESSINGS_TODAY)
+fun Context.getNumberOfBlessingsToday() =
+    if (FirebaseDatabaseService.instance.valueToday == getLastDate())
+        getInt(NUM_OF_BLESSINGS_TODAY)
+    else
+        0
 
-fun Context.addBlessing() {
+fun Context.addBlessingLocally(numOfBlessings: Int) {
     val numOfBlessingsToday = getInt(NUM_OF_BLESSINGS_TODAY)
-    putInt(NUM_OF_BLESSINGS_TODAY, numOfBlessingsToday + 1)
+    putInt(NUM_OF_BLESSINGS_TODAY, numOfBlessingsToday + numOfBlessings)
 }
 
 fun Context.initializeBlessingsOfToday(context: Context) {
@@ -61,3 +74,4 @@ const val NUM_OF_BLESSINGS_THIS_WEEK = "NUM_OF_BLESSINGS_THIS_WEEK"
 const val NUM_OF_BLESSINGS_THIS_MONTH = "NUM_OF_BLESSINGS_THIS_MONTH"
 const val NUM_OF_BLESSINGS_THIS_YEAR = "NUM_OF_BLESSINGS_THIS_YEAR"
 const val NUM_OF_BLESSINGS_EVER = "NUM_OF_BLESSINGS_EVER"
+const val LAST_DATE = "LAST_DATE"

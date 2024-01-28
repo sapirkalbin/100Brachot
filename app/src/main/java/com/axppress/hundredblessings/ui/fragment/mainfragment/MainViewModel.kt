@@ -1,20 +1,15 @@
 package com.axppress.hundredblessings.ui.fragment.mainfragment
 
-import android.content.Context
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.axppress.hundredblessings.utils.BREAD_1
 import com.axppress.hundredblessings.utils.BREAD_2
 import com.axppress.hundredblessings.utils.BREAD_3
 import com.axppress.hundredblessings.utils.BREAD_4
 import com.axppress.hundredblessings.utils.FoodBlessingsScreenType
-import com.axppress.hundredblessings.utils.MorningBlessingsScreenType
-import com.axppress.hundredblessings.utils.addBlessing
 
 class MainViewModel : ViewModel() {
     private var current_fragment: String = "food"
     private var current_blessing_num = 0
-
 
     fun getCurrentFragment(): String {
         return current_fragment
