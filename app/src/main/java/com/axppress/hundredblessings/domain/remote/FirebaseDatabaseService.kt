@@ -1,11 +1,13 @@
 package com.axppress.hundredblessings.domain.remote
 
 import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.MutableLiveData
 import com.axppress.hundredblessings.utils.addBlessingLocally
 import com.axppress.hundredblessings.utils.getLastDate
 import com.axppress.hundredblessings.utils.initializeBlessingsOfToday
 import com.axppress.hundredblessings.utils.putLastDate
+import com.axppress.hundredblessings.utils.putVolumeInstructionsFlag
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -50,6 +52,7 @@ class FirebaseDatabaseService {
         if (lastDate != valueToday) {
             context.initializeBlessingsOfToday(context)
             context.putLastDate(valueToday)
+            context.putVolumeInstructionsFlag(false)
         }
     }
 

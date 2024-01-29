@@ -23,11 +23,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -54,7 +57,9 @@ import com.axppress.hundredblessings.utils.BREAD_3
 import com.axppress.hundredblessings.utils.BREAD_4
 import com.axppress.hundredblessings.utils.DefaultText
 import com.axppress.hundredblessings.utils.Utils
+import com.axppress.hundredblessings.utils.getVolumeInstructionsFlag
 import com.axppress.hundredblessings.utils.noRippleClick
+import com.axppress.hundredblessings.utils.putVolumeInstructionsFlag
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -98,14 +103,249 @@ private fun ScreenContent(
         mutableIntStateOf(keysViewModel.getVolume().value)
     }
 
+    var visible by remember { mutableStateOf(true) }
+
     LaunchedEffect(key1 = Unit) {
         launch {
             keysViewModel.getVolume().collectLatest {
+                if (volume != it)
+                    visible = false
                 volume = it
             }
         }
     }
 
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = if (isLong) 32.dp else 0.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (blessingListButtons.isEmpty()) {
+            BlessingExplanationAndContent(currentFragment, blessingNum, openLink, isLong, volume)
+            VolumeExplanationInstructions(visible, isLong)
+            BottomButton(currentFragment, blessingNum, addBlessing, viewController)
+        } else {
+            ShowListOfButtons(blessingListButtons, currentFragment, viewModel, viewController)
+        }
+    }
+
+    TopHeader(currentFragment, blessingNum)
+
+}
+
+@Composable
+private fun VolumeExplanationInstructions(visible: Boolean, isLong: Boolean) {
+    var visible1 = visible
+    val alreadyShowed = LocalContext.current.getVolumeInstructionsFlag()
+
+    if (visible1 && isLong && !alreadyShowed) {
+        Box(
+            modifier = Modifier
+                .noRippleClick {
+                    visible1 = false
+                }
+                .fillMaxSize()
+                .background(
+                    color = Color(0xD9000000)
+                ), contentAlignment = Alignment.TopCenter
+        )
+        {
+            Image(
+                painterResource(id = R.drawable.volume_control_exp),
+                contentDescription = "",
+                contentScale = ContentScale.FillWidth,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopEnd)
+                    .padding(top = 48.dp)
+            )
+        }
+        LocalContext.current.putVolumeInstructionsFlag(true)
+    }
+}
+
+@Composable
+private fun BlessingExplanationAndContent(
+    currentFragment: String,
+    blessingNum: Int,
+    openLink: (String) -> Unit,
+    isLong: Boolean,
+    volume: Int,
+) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 8.dp)
+            .padding(top = 32.dp, bottom = 40.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center,
+    ) {
+        val explanation =
+            stringResource(getResourcesCompose("${currentFragment}_fragment_${blessingNum}_explanation"))
+        if (explanation.isNotEmpty())
+            DefaultText(
+                explanation,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 8.dp,
+                        end = 8.dp,
+                        bottom = 8.dp
+                    ),
+                textStyleAndSize = MaterialTheme.typography.bodyLarge,
+            )
+
+
+        val string =
+            stringResource(getResourcesCompose("${currentFragment}_fragment_${blessingNum}_blessing"))
+        val annotatedString = buildAnnotatedString {
+            pushStringAnnotation(tag = "dough", annotation = "https://google.com/policy")
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                append("קישור להורדת סדר הפרשת חלה")
+            }
+        }
+
+        if (string.contains("https")) {
+            ClickableText(
+                text = annotatedString,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 8.dp,
+                        end = 8.dp,
+                        bottom = 8.dp
+                    ),
+                style = MaterialTheme.typography.headlineSmall.merge(
+                    textAlign =
+                    TextAlign.Center
+                ),
+                onClick = { offset ->
+                    annotatedString.getStringAnnotations(
+                        tag = "dough",
+                        start = offset,
+                        end = offset
+                    ).firstOrNull()?.let {
+                        openLink(string)
+                    }
+                })
+        } else {
+            DefaultText(
+                string,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 8.dp,
+                        end = 8.dp,
+                        bottom = if (isLong) 40.dp else 8.dp
+                    ),
+                textStyleAndSize = if (!isLong) TextStyle(fontSize = volume.sp) else
+                    TextStyle(fontSize = volume.sp),
+            )
+        }
+
+    }
+}
+
+@Composable
+private fun BottomButton(
+    currentFragment: String,
+    blessingNum: Int,
+    addBlessing: (Int) -> Unit,
+    viewController: NavHostController,
+) {
+    if (Utils.getBlessingNum(currentFragment, blessingNum) > 0) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        bottom = 16.dp, end =
+                        16.dp, start = 16.dp
+                    )
+                    .background(
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                    )
+                    .padding(
+                        8.dp
+                    )
+                    .noRippleClick {
+                        addBlessing(Utils.getBlessingNum(currentFragment, blessingNum))
+                        viewController.navigateUp()
+                        viewController.navigateUp()
+                    }, horizontalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    painterResource(id = R.drawable.blessing),
+                    contentDescription = "",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .size(24.dp),
+                )
+
+                DefaultText(
+                    "בירכתי",
+                    modifier = Modifier,
+                    textStyleAndSize = MaterialTheme.typography.bodyLarge.merge(
+                        TextStyle(
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    )
+                )
+
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShowListOfButtons(
+    blessingListButtons: List<String>,
+    currentFragment: String,
+    viewModel: MainViewModel,
+    viewController: NavHostController,
+) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 32.dp)
+    ) {
+        ListItems(
+            blessingListButtons,
+            currentFragment
+        ) {
+            when (blessingListButtons[it]) {
+                BREAD_1 -> onBlessingClicked(
+                    60,
+                    viewModel, viewController
+                )
+
+                BREAD_2 -> onBlessingClicked(
+                    61,
+                    viewModel, viewController
+                )
+
+                BREAD_3 -> onBlessingClicked(
+                    62,
+                    viewModel, viewController
+                )
+
+                BREAD_4 -> onBlessingClicked(
+                    63,
+                    viewModel, viewController
+                )
+            }
+
+        }
+    }
+}
+
+@Composable
+private fun TopHeader(currentFragment: String, blessingNum: Int) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -131,171 +371,6 @@ private fun ScreenContent(
             )
         )
     }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = if (isLong) 32.dp else 0.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        if (blessingListButtons.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .padding(top = 32.dp, bottom = 40.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.Center,
-            ) {
-                val explanation =
-                    stringResource(getResourcesCompose("${currentFragment}_fragment_${blessingNum}_explanation"))
-                if (explanation.isNotEmpty())
-                    DefaultText(
-                        explanation,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                start = 8.dp,
-                                end = 8.dp,
-                                bottom = 8.dp
-                            ),
-                        textStyleAndSize = MaterialTheme.typography.bodyLarge,
-                    )
-
-
-                val string =
-                    stringResource(getResourcesCompose("${currentFragment}_fragment_${blessingNum}_blessing"))
-                val annotatedString = buildAnnotatedString {
-                    pushStringAnnotation(tag = "dough", annotation = "https://google.com/policy")
-                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append("קישור להורדת סדר הפרשת חלה")
-                    }
-                }
-
-                if (string.contains("https")) {
-                    ClickableText(
-                        text = annotatedString,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                start = 8.dp,
-                                end = 8.dp,
-                                bottom = 8.dp
-                            ),
-                        style = MaterialTheme.typography.headlineSmall.merge(
-                            textAlign =
-                            TextAlign.Center
-                        ),
-                        onClick = { offset ->
-                            annotatedString.getStringAnnotations(
-                                tag = "dough",
-                                start = offset,
-                                end = offset
-                            ).firstOrNull()?.let {
-                                openLink(string)
-                            }
-                        })
-                } else {
-                    DefaultText(
-                        string,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                start = 8.dp,
-                                end = 8.dp,
-                                bottom = if (isLong) 40.dp else 8.dp
-                            ),
-                        textStyleAndSize = if (!isLong) TextStyle(fontSize = volume.sp) else
-                            TextStyle(fontSize = volume.sp),
-                    )
-                }
-
-            }
-
-            if (Utils.getBlessingNum(currentFragment, blessingNum) > 0) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                bottom = 16.dp, end =
-                                16.dp, start = 16.dp
-                            )
-                            .background(
-                                shape = RoundedCornerShape(10.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                            )
-                            .padding(
-                                8.dp
-                            )
-                            .noRippleClick {
-                                addBlessing(Utils.getBlessingNum(currentFragment, blessingNum))
-                                viewController.navigateUp()
-                                viewController.navigateUp()
-                            }, horizontalArrangement = Arrangement.Center
-                    ) {
-                        Image(
-                            painterResource(id = R.drawable.blessing),
-                            contentDescription = "",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .padding(end = 8.dp)
-                                .size(24.dp),
-                        )
-
-                        DefaultText(
-                            "בירכתי",
-                            modifier = Modifier,
-                            textStyleAndSize = MaterialTheme.typography.bodyLarge.merge(
-                                TextStyle(
-                                    fontWeight = FontWeight.ExtraBold
-                                )
-                            )
-                        )
-
-                    }
-                }
-            }
-
-        } else {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 32.dp)
-            ) {
-                ListItems(
-                    blessingListButtons,
-                    currentFragment
-                ) {
-                    when (blessingListButtons[it]) {
-                        BREAD_1 -> onBlessingClicked(
-                            60,
-                            viewModel, viewController
-                        )
-
-                        BREAD_2 -> onBlessingClicked(
-                            61,
-                            viewModel, viewController
-                        )
-
-                        BREAD_3 -> onBlessingClicked(
-                            62,
-                            viewModel, viewController
-                        )
-
-                        BREAD_4 -> onBlessingClicked(
-                            63,
-                            viewModel, viewController
-                        )
-                    }
-
-                }
-            }
-        }
-    }
-
 }
 
 @Composable

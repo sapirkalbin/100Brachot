@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class KeysViewModel : ViewModel() {
-    private val volume: MutableStateFlow<Int> = MutableStateFlow(24)
+    private val volume: MutableStateFlow<Int> = MutableStateFlow(14)
 
     fun volumeUp() {
         CoroutineScope(Dispatchers.IO).launch {
@@ -18,7 +18,7 @@ class KeysViewModel : ViewModel() {
 
     fun volumeDown() {
         CoroutineScope(Dispatchers.IO).launch {
-            if (volume.value > 24)
+            if (volume.value > 14)
                 volume.emit(volume.value - 10)
         }
     }

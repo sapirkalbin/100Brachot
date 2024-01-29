@@ -20,11 +20,17 @@ fun Context.putLastDate(value: String) {
     getSharedPreferences().edit().putString(LAST_DATE, value).apply()
 }
 
+fun Context.putVolumeInstructionsFlag(value: Boolean) {
+    getSharedPreferences().edit().putBoolean(VOLUME_INSTRUCTIONS_FLAG, value).apply()
+}
+
 fun Context.getLastDate() = getString(LAST_DATE)
+fun Context.getVolumeInstructionsFlag() = getBoolean(VOLUME_INSTRUCTIONS_FLAG)
 
 
 fun Context.getInt(key: String) = getSharedPreferences().getInt(key, 0)
 fun Context.getString(key: String) = getSharedPreferences().getString(key, "")
+fun Context.getBoolean(key: String) = getSharedPreferences().getBoolean(key, false)
 
 fun Context.getNumberOfBlessingsToday() =
     if (FirebaseDatabaseService.instance.valueToday == getLastDate())
@@ -75,3 +81,4 @@ const val NUM_OF_BLESSINGS_THIS_MONTH = "NUM_OF_BLESSINGS_THIS_MONTH"
 const val NUM_OF_BLESSINGS_THIS_YEAR = "NUM_OF_BLESSINGS_THIS_YEAR"
 const val NUM_OF_BLESSINGS_EVER = "NUM_OF_BLESSINGS_EVER"
 const val LAST_DATE = "LAST_DATE"
+const val VOLUME_INSTRUCTIONS_FLAG = "VOLUME_INSTRUCTIONS_FLAG"

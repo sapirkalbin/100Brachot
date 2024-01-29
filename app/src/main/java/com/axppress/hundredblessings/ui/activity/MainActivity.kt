@@ -116,11 +116,23 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-            viewModel.volumeDown()
-        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            viewModel.volumeUp()
+        when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                viewModel.volumeDown()
+                return true
+            }
+
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+                viewModel.volumeUp()
+                return true
+            }
+
+            KeyEvent.KEYCODE_BACK -> {
+                onBackPressedDispatcher.onBackPressed()
+                return true
+            }
+
+            else -> return false
         }
-        return true
     }
 }

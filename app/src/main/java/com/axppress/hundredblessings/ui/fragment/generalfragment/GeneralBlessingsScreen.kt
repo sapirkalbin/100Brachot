@@ -49,7 +49,7 @@ private fun onBlessingClicked(
 }
 
 fun isLongBlessing(name: String, num: Int): Boolean {
-    return name == FRAGMENT_4 || name == FRAGMENT_5 || (name == FRAGMENT_2 && num == 7) || (name == FRAGMENT_6 && num == 4)
+    return name == FRAGMENT_4 || name == FRAGMENT_5 || (name == FRAGMENT_2 && num == 7 || num == 6) || (name == FRAGMENT_6 && num == 4)
 }
 
 @Composable
