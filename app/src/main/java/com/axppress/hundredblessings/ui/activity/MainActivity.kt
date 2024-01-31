@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         FirebaseDatabaseService.instance.initializeMyBlessings(this)
-        FirebaseDatabaseService.instance.getBlessingsToday()
+        FirebaseDatabaseService.instance.getBlessingsToday(this)
 
         setContent {
             AppTheme {

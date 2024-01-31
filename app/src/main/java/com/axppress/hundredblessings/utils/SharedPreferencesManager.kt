@@ -32,22 +32,33 @@ fun Context.getInt(key: String) = getSharedPreferences().getInt(key, 0)
 fun Context.getString(key: String) = getSharedPreferences().getString(key, "")
 fun Context.getBoolean(key: String) = getSharedPreferences().getBoolean(key, false)
 
-fun Context.getNumberOfBlessingsToday() =
+fun Context.getNumberOfMyBlessingsToday() =
     if (FirebaseDatabaseService.instance.valueToday == getLastDate())
-        getInt(NUM_OF_BLESSINGS_TODAY)
+        getInt(NUM_OF_MY_BLESSINGS_TODAY)
     else
         0
 
-fun Context.addBlessingLocally(numOfBlessings: Int) {
-    val numOfBlessingsToday = getInt(NUM_OF_BLESSINGS_TODAY)
-    putInt(NUM_OF_BLESSINGS_TODAY, numOfBlessingsToday + numOfBlessings)
+fun Context.addMyBlessingLocally(numOfBlessings: Int) {
+    val numOfBlessingsToday = getInt(NUM_OF_MY_BLESSINGS_TODAY)
+    putInt(NUM_OF_MY_BLESSINGS_TODAY, numOfBlessingsToday + numOfBlessings)
+}
+
+fun Context.getNumberOfAllBlessingsToday() =
+    if (FirebaseDatabaseService.instance.valueToday == getLastDate())
+        getInt(NUM_OF_ALL_BLESSINGS_TODAY)
+    else
+        0
+
+fun Context.updateAllBlessingsToday(numOfBlessings: Int) {
+    putInt(NUM_OF_ALL_BLESSINGS_TODAY, numOfBlessings)
 }
 
 fun Context.initializeBlessingsOfToday(context: Context) {
-    val numOfBlessingsToday = getInt(NUM_OF_BLESSINGS_TODAY)
+    val numOfBlessingsToday = getInt(NUM_OF_MY_BLESSINGS_TODAY)
     val numOfBlessingsThisWeek = getInt(NUM_OF_BLESSINGS_THIS_WEEK)
 
-    context.putInt(NUM_OF_BLESSINGS_TODAY, 0)
+    context.putInt(NUM_OF_MY_BLESSINGS_TODAY, 0)
+    context.putInt(NUM_OF_ALL_BLESSINGS_TODAY, 0)
     context.putInt(NUM_OF_BLESSINGS_THIS_WEEK, numOfBlessingsThisWeek + numOfBlessingsToday)
 }
 
@@ -75,10 +86,13 @@ fun Context.initializeBlessingsOfThisYear(context: Context) {
     context.putInt(NUM_OF_BLESSINGS_EVER, numOfBlessingsThisYear + numOfBlessingsEver)
 }
 
-const val NUM_OF_BLESSINGS_TODAY = "NUM_OF_BLESSINGS_TODAY"
+const val NUM_OF_MY_BLESSINGS_TODAY = "NUM_OF_MY_BLESSINGS_TODAY"
+const val NUM_OF_ALL_BLESSINGS_TODAY = "NUM_OF_ALL_BLESSINGS_TODAY"
+const val VOLUME_INSTRUCTIONS_FLAG = "VOLUME_INSTRUCTIONS_FLAG"
+const val LAST_DATE = "LAST_DATE"
+
+
 const val NUM_OF_BLESSINGS_THIS_WEEK = "NUM_OF_BLESSINGS_THIS_WEEK"
 const val NUM_OF_BLESSINGS_THIS_MONTH = "NUM_OF_BLESSINGS_THIS_MONTH"
 const val NUM_OF_BLESSINGS_THIS_YEAR = "NUM_OF_BLESSINGS_THIS_YEAR"
 const val NUM_OF_BLESSINGS_EVER = "NUM_OF_BLESSINGS_EVER"
-const val LAST_DATE = "LAST_DATE"
-const val VOLUME_INSTRUCTIONS_FLAG = "VOLUME_INSTRUCTIONS_FLAG"

@@ -13,7 +13,7 @@ navigationUiKtx = "2.7.6"
 ui = "1.5.4"
 uiTooling = "1.5.4"
 uiToolingPreview = "1.5.4"
-firebaseDatabaseKtx = "20.3.0"
+firebaseFirestoreKtx = "24.10.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,8 +35,7 @@ androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation
 ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooling" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
-firebase-database-ktx = { group = "com.google.firebase", name = "firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
-
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

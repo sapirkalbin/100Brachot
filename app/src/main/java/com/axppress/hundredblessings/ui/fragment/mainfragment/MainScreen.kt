@@ -47,7 +47,6 @@ import androidx.navigation.compose.rememberNavController
 import com.axppress.hundredblessings.R
 import com.axppress.hundredblessings.compose.theme.AppTheme
 import com.axppress.hundredblessings.domain.remote.FirebaseDatabaseService
-import com.axppress.hundredblessings.ui.activity.MainActivity
 import com.axppress.hundredblessings.utils.BLESSING_FRAGMENT
 import com.axppress.hundredblessings.utils.DefaultAnnotatedText
 import com.axppress.hundredblessings.utils.DefaultText
@@ -56,13 +55,13 @@ import com.axppress.hundredblessings.utils.GENERAL_FRAGMENT
 import com.axppress.hundredblessings.utils.MAIN_FRAGMENT
 import com.axppress.hundredblessings.utils.TextFormatter
 import com.axppress.hundredblessings.utils.getFragmentNameByNum
-import com.axppress.hundredblessings.utils.getNumberOfBlessingsToday
+import com.axppress.hundredblessings.utils.getNumberOfMyBlessingsToday
 import com.axppress.hundredblessings.utils.noRippleClick
 import com.axppress.hundredblessings.utils.textMultiStyle
+import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -94,7 +93,7 @@ private fun ScreenContent(
     viewModel: MainViewModel,
     onBlessedButtonClick: () -> Unit,
 ) {
-    val num = LocalContext.current.getNumberOfBlessingsToday()
+    val num = LocalContext.current.getNumberOfMyBlessingsToday()
     var numberOfBlessingsToday by remember {
         mutableIntStateOf(num)
     }
@@ -671,7 +670,7 @@ private fun TopTexts(numberOfBlessingsToday: Int) {
     }
 
     var numberOfBlessingsTodayGeneral by remember {
-        mutableIntStateOf(FirebaseDatabaseService.instance.numOfBlessings.value)
+        mutableIntStateOf(FirebaseDatabaseService.instance.numOfAllPeopleBlessingsToday.value)
     }
     var numberOfBlessingsTodayGeneralFormatted =
         TextFormatter.numberWithCommas(numberOfBlessingsTodayGeneral)
@@ -680,7 +679,7 @@ private fun TopTexts(numberOfBlessingsToday: Int) {
 
     LaunchedEffect(key1 = Unit) {
         launch {
-            FirebaseDatabaseService.instance.numOfBlessings.collectLatest {
+            FirebaseDatabaseService.instance.numOfAllPeopleBlessingsToday.collectLatest {
                 numberOfBlessingsTodayGeneral = it
                 numberOfBlessingsTodayGeneralFormatted =
                     TextFormatter.numberWithCommas(it)
