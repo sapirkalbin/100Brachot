@@ -67,7 +67,7 @@ class FirebaseDatabaseService {
 
         database.collection("dailyBlessingCounter")
             .document(valueToday)
-            .update(
+            .set(
                 mapOf(
                     "counter" to numOfBlessingsTodayFromServer + blessings
                 )
@@ -98,7 +98,7 @@ class FirebaseDatabaseService {
     private fun getNumberOfBlessingsFromServer(onSuccessListener: (Long) -> Unit) {
         database.collection("dailyBlessingCounter").document(valueToday)
             .get().continueWith {
-                onSuccessListener(it.result?.get("counter") as Long)
+                onSuccessListener(it.result?.get("counter") as? Long ?: 0)
             }.addOnFailureListener {
                 print(it.message)
             }.addOnCanceledListener {
