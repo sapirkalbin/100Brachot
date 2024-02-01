@@ -13,6 +13,7 @@ const val FRAGMENT_6 = "other" //6
 const val FRAGMENT_7 = "tehilim"
 const val FRAGMENT_8 = "specials"
 const val FRAGMENT_9  = "news" //6
+const val FRAGMENT_10  = "info" //6
 
 const val BLESSING_FRAGMENT = "blessing"
 
@@ -28,5 +29,6 @@ fun getFragmentNameByNum(num: Int) = when (num) {
     7 -> FRAGMENT_7
     8 -> FRAGMENT_8
     9 -> FRAGMENT_9
+    10 -> FRAGMENT_10
     else -> MAIN_FRAGMENT
 }

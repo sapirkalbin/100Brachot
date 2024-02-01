@@ -10,6 +10,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 import com.axppress.hundredblessings.ui.fragment.mainfragment.TextWithStyle
 
 @Composable
@@ -42,12 +44,14 @@ fun DefaultText(
     modifier: Modifier = Modifier,
     textStyleAndSize: TextStyle = MaterialTheme.typography.titleLarge,
     textColor: Color = MaterialTheme.colorScheme.onBackground,
+    lineHeight: TextUnit = TextUnit.Unspecified,
 ) {
     Text(
         text = text,
         modifier = modifier,
         textAlign = TextAlign.Center,
         color = textColor,
+        lineHeight = lineHeight,
         style = TextStyle(textDirection = TextDirection.Rtl).merge(
             textStyleAndSize,
         ),

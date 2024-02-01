@@ -238,7 +238,7 @@ private fun BlessingExplanationAndContent(
                         end = 8.dp,
                         bottom = if (isLong) 40.dp else 8.dp
                     ),
-                textStyleAndSize = if (!isLong) TextStyle(fontSize = volume.sp) else
+                textStyleAndSize = if (currentFragment == "info") MaterialTheme.typography.bodyLarge else if (!isLong) MaterialTheme.typography.headlineSmall else
                     TextStyle(fontSize = volume.sp),
             )
         }

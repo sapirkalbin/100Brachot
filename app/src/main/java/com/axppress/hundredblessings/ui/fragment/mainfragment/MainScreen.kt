@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +32,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlatformTextStyle
@@ -50,6 +53,7 @@ import com.axppress.hundredblessings.domain.remote.FirebaseDatabaseService
 import com.axppress.hundredblessings.utils.BLESSING_FRAGMENT
 import com.axppress.hundredblessings.utils.DefaultAnnotatedText
 import com.axppress.hundredblessings.utils.DefaultText
+import com.axppress.hundredblessings.utils.FRAGMENT_10
 import com.axppress.hundredblessings.utils.FRAGMENT_5
 import com.axppress.hundredblessings.utils.GENERAL_FRAGMENT
 import com.axppress.hundredblessings.utils.MAIN_FRAGMENT
@@ -58,7 +62,6 @@ import com.axppress.hundredblessings.utils.getFragmentNameByNum
 import com.axppress.hundredblessings.utils.getNumberOfMyBlessingsToday
 import com.axppress.hundredblessings.utils.noRippleClick
 import com.axppress.hundredblessings.utils.textMultiStyle
-import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -66,6 +69,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 var itemClicked = false
+var screenWidth = 400
+var iconSize = 40.dp
 
 @Composable
 fun MainScreen(
@@ -73,6 +78,9 @@ fun MainScreen(
     viewModel: MainViewModel,
     onBlessedButtonClick: () -> Unit,
 ) {
+    val configuration = LocalConfiguration.current
+    screenWidth = configuration.screenWidthDp
+
     //DISABLE DOUBLE CLICKS
     if (navController.currentDestination?.route == MAIN_FRAGMENT) {
         itemClicked = false
@@ -93,16 +101,33 @@ private fun ScreenContent(
     viewModel: MainViewModel,
     onBlessedButtonClick: () -> Unit,
 ) {
-    val num = LocalContext.current.getNumberOfMyBlessingsToday()
+    val num = if (LocalInspectionMode.current)
+        0
+    else
+        getNumberOfMyBlessingsToday(LocalContext.current)
     var numberOfBlessingsToday by remember {
         mutableIntStateOf(num)
     }
+    Icon(
+        painter = painterResource(id = R.drawable.ic_info),
+        "info button",
+        tint = MaterialTheme.colorScheme.onBackground,
+        modifier = Modifier
+            .size(48.dp)
+            .padding(8.dp)
+            .noRippleClick {
+                viewModel.setCurrentFragment(FRAGMENT_10)
+                navController.navigate("$BLESSING_FRAGMENT?blessing=${viewModel.getCurrentFragment()}?type=0?noSubList=${true}?isLong=${false}")
+            }
+    )
+
+
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 64.dp),
+            .padding(top = 40.dp)
     ) {
         TopTexts(numberOfBlessingsToday)
         BottomPanel({
@@ -130,14 +155,14 @@ private fun BottomPanel(
         contentAlignment = Alignment.TopCenter,
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 32.dp),
+            .padding(top = 16.dp),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 100.dp)
                 .background(
-                    shape = RoundedCornerShape(32.dp),
+                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
                     color = MaterialTheme.colorScheme.tertiaryContainer,
                 ),
         ) {
@@ -145,9 +170,8 @@ private fun BottomPanel(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 32.dp),
             ) {
-                Row(Modifier.padding(top = 96.dp, start = 8.dp, end = 8.dp)) {
+                Row(Modifier.padding(top = (screenWidth / 3).dp, start = 8.dp, end = 8.dp)) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -167,13 +191,13 @@ private fun BottomPanel(
                             },
                     ) {
                         DefaultText(
-                            "על ראייה",
+                            "ראייה",
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(
                                     start = 8.dp,
                                     bottom = 4.dp,
-                                    top = 16.dp,
+                                    top = 8.dp,
                                     end = 8.dp,
                                 ),
                             textStyleAndSize = MaterialTheme.typography.bodyLarge,
@@ -183,7 +207,7 @@ private fun BottomPanel(
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
-                                .size(50.dp)
+                                .size(iconSize)
                                 .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
                                 .align(Alignment.CenterHorizontally),
                         )
@@ -206,11 +230,11 @@ private fun BottomPanel(
                             },
                     ) {
                         DefaultText(
-                            "על מזון",
+                            "מזון",
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(
-                                    start = 8.dp, end = 8.dp, top = 16.dp, bottom = 4.dp
+                                    start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp
                                 ),
                             textStyleAndSize = MaterialTheme.typography.bodyLarge,
                         )
@@ -219,7 +243,7 @@ private fun BottomPanel(
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
-                                .size(50.dp)
+                                .size(iconSize)
                                 .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
                                 .align(Alignment.CenterHorizontally),
                         )
@@ -247,7 +271,7 @@ private fun BottomPanel(
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(
-                                    start = 8.dp, end = 8.dp, top = 16.dp, bottom = 4.dp
+                                    start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp
                                 ),
                             textStyleAndSize = MaterialTheme.typography.bodyLarge,
 
@@ -257,7 +281,7 @@ private fun BottomPanel(
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
-                                .size(50.dp)
+                                .size(iconSize)
                                 .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
                                 .align(Alignment.CenterHorizontally),
                         )
@@ -280,11 +304,11 @@ private fun BottomPanel(
                             },
                     ) {
                         DefaultText(
-                            "על הריח",
+                            "ריח",
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(
-                                    start = 8.dp, end = 8.dp, top = 16.dp, bottom = 4.dp
+                                    start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp
                                 ),
                             textStyleAndSize = MaterialTheme.typography.bodyLarge,
 
@@ -294,7 +318,7 @@ private fun BottomPanel(
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
-                                .size(50.dp)
+                                .size(iconSize)
                                 .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
                                 .align(Alignment.CenterHorizontally),
                         )
@@ -324,17 +348,17 @@ private fun BottomPanel(
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(
-                                    start = 8.dp, end = 8.dp, top = 16.dp, bottom = 4.dp
+                                    start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp
                                 ),
                             textStyleAndSize = MaterialTheme.typography.bodyLarge,
-
+                           lineHeight = 16.sp,
                             )
                         Image(
                             painterResource(id = R.drawable.car),
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
-                                .size(50.dp)
+                                .size(iconSize)
                                 .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
                                 .align(Alignment.CenterHorizontally),
                         )
@@ -361,16 +385,17 @@ private fun BottomPanel(
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(
-                                    start = 8.dp, end = 8.dp, top = 16.dp, bottom = 4.dp
+                                    start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp
                                 ),
                             textStyleAndSize = MaterialTheme.typography.bodyLarge,
-                        )
+                            lineHeight = 16.sp,
+                            )
                         Image(
                             painterResource(id = R.drawable.sleeping),
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
-                                .size(50.dp)
+                                .size(iconSize)
                                 .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
                                 .align(Alignment.CenterHorizontally),
                         )
@@ -400,17 +425,18 @@ private fun BottomPanel(
                                 .padding(
                                     start = 8.dp,
                                     bottom = 4.dp,
-                                    top = 16.dp,
+                                    top = 8.dp,
                                     end = 8.dp,
                                 ),
                             textStyleAndSize = MaterialTheme.typography.bodyLarge,
-                        )
+                            lineHeight = 16.sp,
+                            )
                         Image(
                             painterResource(id = R.drawable.sunrise),
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
-                                .size(50.dp)
+                                .size(iconSize)
                                 .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
                                 .align(Alignment.CenterHorizontally),
                         )
@@ -440,17 +466,18 @@ private fun BottomPanel(
                                 .padding(
                                     start = 8.dp,
                                     bottom = 4.dp,
-                                    top = 16.dp,
+                                    top = 8.dp,
                                     end = 8.dp,
                                 ),
                             textStyleAndSize = MaterialTheme.typography.bodyLarge,
-                        )
+                            lineHeight = 16.sp,
+                            )
                         Image(
                             painterResource(id = R.drawable.tshirt),
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
-                                .size(50.dp)
+                                .size(iconSize)
                                 .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
                                 .align(Alignment.CenterHorizontally),
                         )
@@ -481,7 +508,7 @@ private fun BottomPanel(
                             .padding(
                                 start = 8.dp,
                                 bottom = 4.dp,
-                                top = 16.dp,
+                                top = 8.dp,
                                 end = 8.dp,
                             ),
                         textStyleAndSize = MaterialTheme.typography.bodyLarge,
@@ -491,7 +518,7 @@ private fun BottomPanel(
                         contentDescription = "",
                         contentScale = ContentScale.Fit,
                         modifier = Modifier
-                            .size(50.dp)
+                            .size(iconSize)
                             .padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
                             .align(Alignment.CenterHorizontally),
                     )
@@ -600,16 +627,17 @@ private fun BlessedButton(onBlessedButtonClick: () -> Unit) {
 
     Box(
         modifier = Modifier
-            .size(220.dp)
+            .size((screenWidth.dp / 2) + 20.dp)
             .background(
                 color = MaterialTheme.colorScheme.background,
                 shape = CircleShape,
             ),
     ) {
+
         Box(
             contentAlignment = Alignment.TopCenter,
             modifier = Modifier
-                .size(200.dp)
+                .size(screenWidth.dp / 2)
                 .scale(scale.value)
                 .align(Alignment.Center)
                 .background(
@@ -644,7 +672,10 @@ private fun BlessedButton(onBlessedButtonClick: () -> Unit) {
                             includeFontPadding = false,
                         ),
                     ).merge(
-                        MaterialTheme.typography.displayMedium,
+                        if (screenWidth < 400)
+                            MaterialTheme.typography.displaySmall
+                        else
+                            MaterialTheme.typography.displayMedium,
                     ),
                     textAlign = TextAlign.Center,
                 )
@@ -653,7 +684,7 @@ private fun BlessedButton(onBlessedButtonClick: () -> Unit) {
                     contentDescription = "",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .size(60.dp)
+                        .size(screenWidth.dp / 2 / 4)
                         .align(Alignment.CenterHorizontally),
                 )
             }
@@ -668,9 +699,12 @@ private fun TopTexts(numberOfBlessingsToday: Int) {
     } else {
         0
     }
-
+    val isLocalInspectionMode = LocalInspectionMode.current
     var numberOfBlessingsTodayGeneral by remember {
-        mutableIntStateOf(FirebaseDatabaseService.instance.numOfAllPeopleBlessingsToday.value)
+        if (!isLocalInspectionMode)
+            mutableIntStateOf(FirebaseDatabaseService.instance.numOfAllPeopleBlessingsToday.value)
+        else
+            mutableIntStateOf(0)
     }
     var numberOfBlessingsTodayGeneralFormatted =
         TextFormatter.numberWithCommas(numberOfBlessingsTodayGeneral)
@@ -739,6 +773,7 @@ private fun TopTextsScreenContent(
                     ),
                 ),
             ),
+            textSize = TextStyle(fontSize = 20.sp, textAlign = TextAlign.Center),
         )
     }
 
@@ -782,7 +817,7 @@ private fun TopTextsScreenContent(
                 ),
             ),
         ),
-        textSize = MaterialTheme.typography.titleMedium.merge(TextStyle(fontWeight = FontWeight.Bold)),
+        textSize = MaterialTheme.typography.bodyMedium.merge(TextStyle(fontWeight = FontWeight.Bold)),
     )
 }
 

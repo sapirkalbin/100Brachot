@@ -32,9 +32,9 @@ fun Context.getInt(key: String) = getSharedPreferences().getInt(key, 0)
 fun Context.getString(key: String) = getSharedPreferences().getString(key, "")
 fun Context.getBoolean(key: String) = getSharedPreferences().getBoolean(key, false)
 
-fun Context.getNumberOfMyBlessingsToday() =
-    if (FirebaseDatabaseService.instance.valueToday == getLastDate())
-        getInt(NUM_OF_MY_BLESSINGS_TODAY)
+fun getNumberOfMyBlessingsToday(context: Context) =
+    if (FirebaseDatabaseService.instance.valueToday == context.getLastDate())
+        context.getInt(NUM_OF_MY_BLESSINGS_TODAY)
     else
         0
 
