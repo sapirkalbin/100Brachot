@@ -115,6 +115,8 @@ private fun ScreenContent(
         }
     }
 
+    val blessingNum_ = if (currentFragment == "tehilim") blessingNum + 1 else blessingNum
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -122,15 +124,15 @@ private fun ScreenContent(
         contentAlignment = Alignment.Center
     ) {
         if (blessingListButtons.isEmpty()) {
-            BlessingExplanationAndContent(currentFragment, blessingNum, openLink, isLong, volume)
+            BlessingExplanationAndContent(currentFragment, blessingNum_, openLink, isLong, volume)
             VolumeExplanationInstructions(visible, isLong)
-            BottomButton(currentFragment, blessingNum, addBlessing, viewController)
+            BottomButton(currentFragment, blessingNum_, addBlessing, viewController)
         } else {
             ShowListOfButtons(blessingListButtons, currentFragment, viewModel, viewController)
         }
     }
 
-    TopHeader(currentFragment, blessingNum)
+    TopHeader(currentFragment, blessingNum_)
 
 }
 
@@ -181,19 +183,24 @@ private fun BlessingExplanationAndContent(
         verticalArrangement = Arrangement.Center,
     ) {
         val explanation =
-            stringResource(getResourcesCompose("${currentFragment}_fragment_${blessingNum}_explanation"))
-        if (explanation.isNotEmpty())
-            DefaultText(
-                explanation,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 8.dp,
-                        end = 8.dp,
-                        bottom = 8.dp
-                    ),
-                textStyleAndSize = MaterialTheme.typography.bodyLarge,
-            )
+            getResourcesCompose("${currentFragment}_fragment_${blessingNum}_explanation")
+
+        if (explanation != 0) {
+            val explanationText = stringResource(explanation)
+            if (explanationText.isNotEmpty()) {
+                DefaultText(
+                    explanationText,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 8.dp,
+                            end = 8.dp,
+                            bottom = 8.dp
+                        ),
+                    textStyleAndSize = MaterialTheme.typography.bodyLarge,
+                )
+            }
+        }
 
 
         val string =
@@ -238,7 +245,7 @@ private fun BlessingExplanationAndContent(
                         end = 8.dp,
                         bottom = if (isLong) 40.dp else 8.dp
                     ),
-                textStyleAndSize = if (currentFragment == "info") MaterialTheme.typography.bodyLarge else if (!isLong) MaterialTheme.typography.headlineSmall else
+                textStyleAndSize = if (currentFragment == "info") MaterialTheme.typography.bodyLarge else if (!isLong || (currentFragment == "tehilim" && volume == 14)) MaterialTheme.typography.headlineSmall else
                     TextStyle(fontSize = volume.sp),
             )
         }

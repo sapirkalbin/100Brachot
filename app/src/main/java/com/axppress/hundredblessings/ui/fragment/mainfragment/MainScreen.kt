@@ -498,7 +498,7 @@ private fun BottomPanel(
                             color = if (states[7]) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.secondaryContainer,
                         )
                         .noRippleClick {
-                            //onButtonClick(states, navController, viewModel, 7)
+                            onButtonClick(states, navController, viewModel, 7)
                         },
                 ) {
                     DefaultText(

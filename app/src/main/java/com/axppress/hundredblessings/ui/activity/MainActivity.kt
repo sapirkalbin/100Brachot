@@ -76,7 +76,8 @@ class MainActivity : AppCompatActivity() {
                             val blessing = it.arguments?.getString("blessing", "") ?: ""
                             val type = it.arguments?.getInt("type") ?: 0
                             val noSubList = it.arguments?.getBoolean("noSubList") ?: false
-                            val isLong = it.arguments?.getBoolean("isLong") ?: false
+                            val isLong =
+                                it.arguments?.getBoolean("isLong") ?: false || blessing == "tehilim"
 
                             val listOfButtons = if (noSubList)
                                 listOf()

@@ -1,8 +1,8 @@
 package com.axppress.hundredblessings.ui.compose
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -34,8 +34,14 @@ fun BlessingListItem(fragmentId: String, num: Int, onBlessingClicked: (Int) -> U
                 onBlessingClicked(num)
             }
     ) {
+        var _num = num
+        if (fragmentId == "tehilim") {
+            _num = num + 1
+        }
+
+        Log.e("explanation:", _num.toString())
         DefaultText(
-            stringResource(getResourcesCompose("${fragmentId}_fragment_${num}_header")),
+            stringResource(getResourcesCompose("${fragmentId}_fragment_${_num}_header")),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
@@ -44,20 +50,24 @@ fun BlessingListItem(fragmentId: String, num: Int, onBlessingClicked: (Int) -> U
                 ),
             textStyleAndSize = MaterialTheme.typography.bodyLarge.merge(TextStyle(fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold))
         )
-        DefaultText(
-            stringResource(getResourcesCompose("${fragmentId}_fragment_${num}_explanation")),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = 8.dp,
-                    end = 8.dp,
-                    bottom = 8.dp
-                )
-                .noRippleClick {
-                    onBlessingClicked(num)
-                },
-            textStyleAndSize = MaterialTheme.typography.bodySmall,
-        )
+
+        val explanation = getResourcesCompose("${fragmentId}_fragment_${_num}_explanation")
+
+        if (explanation != 0)
+            DefaultText(
+                stringResource(explanation),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 8.dp,
+                        end = 8.dp,
+                        bottom = 8.dp
+                    )
+                    .noRippleClick {
+                        onBlessingClicked(_num)
+                    },
+                textStyleAndSize = MaterialTheme.typography.bodySmall,
+            )
     }
 }
 
