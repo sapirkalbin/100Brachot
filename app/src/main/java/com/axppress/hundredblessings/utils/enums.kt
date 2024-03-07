@@ -69,12 +69,13 @@ enum class NewThings(val num: Int) {
 }
 
 enum class OtherBlessings(val num: Int) {
-    ISRAEL_MIRACLES(0),
-    FAMILY_MIRACLES(1),
-    HEALTHIER(2),
-    DOUGH_PRAYER(3),
-    WAY_PRAYER(4),
-    ASHER_YATZAR(5),
+    SHMONE_ESRA(0),
+    ISRAEL_MIRACLES(1),
+    FAMILY_MIRACLES(2),
+    HEALTHIER(3),
+    DOUGH_PRAYER(4),
+    WAY_PRAYER(5),
+    ASHER_YATZAR(6),
 }
 
 enum class SpecialPrayers(val num: Int) {

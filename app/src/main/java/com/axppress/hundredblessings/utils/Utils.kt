@@ -54,7 +54,10 @@ object Utils {
             }
 
             FRAGMENT_6 -> {
-                return 1
+                return if (blessingNum == 0)
+                    19
+                else
+                    1
             }
 
             FRAGMENT_7 -> {
